@@ -1,5 +1,5 @@
 
-namespace ApiApplication
+namespace InsuranceCompany.UI
 {
     public class Program
     {
@@ -11,10 +11,8 @@ namespace ApiApplication
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
 
             var app = builder.Build();
 
