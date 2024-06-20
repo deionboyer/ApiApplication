@@ -4,3 +4,8 @@ GET {{ApiApplication_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+# GET {{ApiApplication_HostAddress}}/patients/
+# Accept: application/json
+
+# ###
