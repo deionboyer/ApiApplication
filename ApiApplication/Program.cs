@@ -1,4 +1,8 @@
 
+using ApiApplication.Interfaces;
+using ApiApplication.Repositories;
+using System.Security.AccessControl;
+
 namespace ApiApplication
 {
     public class Program
@@ -15,8 +19,14 @@ namespace ApiApplication
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-
+            builder.Services.AddSingleton<IInsuranceProvidersRepository, InsuranceProvidersRepository>();
+            builder.Services.AddSingleton<IPatientsRepository,PatientsRepository>();
+            
             var app = builder.Build();
+
+            //AddScoped<IInsuranceProvidersRepository, InsuranceProvidersRepository>();
+            //AddScoped<IPatientsRepository, PatientsRepository>();
+            
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -26,6 +36,14 @@ namespace ApiApplication
             }
 
             app.UseHttpsRedirection();
+            
+            app.UseCors(options =>
+            {
+                options.WithOrigins("http://localhost:4200/");
+                options.AllowAnyHeader();
+                options.AllowAnyOrigin();
+                options.AllowAnyMethod();
+            });
 
             app.UseAuthorization();
 
@@ -34,5 +52,6 @@ namespace ApiApplication
 
             app.Run();
         }
+        
     }
 }

@@ -1,6 +1,0 @@
-@InsuranceCompany.UI_HostAddress = http://localhost:5139
-
-GET {{InsuranceCompany.UI_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -1,88 +1,83 @@
-﻿using ApiApplication.Models;
+﻿using ApiApplication.Interfaces;
+using ApiApplication.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
 namespace ApiApplication.Controllers
 {
-    [ApiController] //ANNOTTION
-    [Route("[controller]")] //ANNOTATION
+    [Route("api/[controller]")]
+    [ApiController]
     public class InsuranceProvidersController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
-        private readonly string connectionString;
-        public InsuranceProvidersController(IConfiguration configuration)
+        private readonly IInsuranceProvidersRepository _insuranceProvidersRepo;
+        public InsuranceProvidersController(IInsuranceProvidersRepository insuranceProvidersRepo)
         {
-            connectionString = configuration.GetConnectionString("DefaultConnection");
+            _insuranceProvidersRepo = insuranceProvidersRepo;
         }
-        private readonly List<InsuranceProviders> _providers = new List<InsuranceProviders>();
-        //private readonly ILogger<InsuranceProvidersController> _logger;
-        //public InsuranceProvidersController(ILogger<InsuranceProvidersController> logger)
-        //{
-        //    _logger = logger;
-        //}
-
-        [HttpGet("GetAllProviders")]
-        public IActionResult GetAllProviders(int id) //List of providers
+        [HttpPost("CreateProvider")]
+        public async Task<int> CreateProviderAsync([FromBody] InsuranceProviders providers)
         {
-            using (var connection = new SqlConnection(connectionString))
+            try
             {
-                connection.Open();
-                var querySql = "SELECT * FROM InsuranceProviders";
-                var command = new SqlCommand(querySql, connection);
-                var providers = new List<InsuranceProviders>();
-
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var provider = new InsuranceProviders
-                        {
-                            InsuranceId = Convert.ToInt32(reader["InsuranceId"]),
-                            State = reader["State"].ToString(),
-                            InsuranceName = reader["InsuranceName"].ToString(),
-                            Covered = Convert.ToBoolean(reader["Covered"]),
-                            CoPay = (int)Convert.ToDecimal(reader["CoPay"])
-                        };
-                        providers.Add(provider);
-                    }
-                }
-
-                return Ok(providers);
-                // Return Ok(patient) or NotFound() if not found
+                int insuranceId = await Task.Run(() => _insuranceProvidersRepo.CreateInsuranceProvider(providers));
+                return insuranceId;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error creating insurance provider: {ex.Message}");
             }
         }
-      
-
-        [HttpGet("GetProviderById")]
-        public IActionResult GetProviderByID(int insuranceId) ///return providers
+        [HttpGet("GetAllProviders")]
+        public async Task<List<InsuranceProviders>> GetAllProvidersAsync()
         {
-            using (var connection = new SqlConnection(connectionString))
+            try
             {
-                connection.Open();
-                var querySql = "SELECT * FROM InsuranceProviders WHERE @InsuranceID = InsuranceID";
-                var command = new SqlCommand(querySql,connection);
-                command.Parameters.AddWithValue(@"InsuranceID", insuranceId);
-
-                using(var reader = command.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        var providers = new InsuranceProviders()
-                        {
-                            InsuranceId = Convert.ToInt32(reader["InsuranceId"]),
-                            State = reader["State"].ToString(),
-                            InsuranceName = reader["InsuranceName"].ToString(),
-                            Covered = Convert.ToBoolean(reader["Covered"]),
-                            CoPay = (int)Convert.ToDecimal(reader["CoPay"])
-                        };
-                        return Ok(providers);
-                    }
-                    else
-                    {
-                        return NotFound("Patient not found");
-                    }
-                }
+                List<InsuranceProviders> providersList = await Task.Run(() => _insuranceProvidersRepo.GetAllProviders());
+                return providersList;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving insurance providers: {ex.Message}");
+            }
+        }
+        [HttpGet("GetProviderById")]
+        public async Task<InsuranceProviders> GetProviderByIdAsync(int insuranceId)
+        {
+            try
+            {
+                InsuranceProviders provider = await Task.Run(() => _insuranceProvidersRepo.GetProviderById(insuranceId));
+                return provider;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Error retrieving insurance provider: {ex.Message}");
+            }
+        }
+        [HttpGet("UpdateProvider")]
+        public async Task<int> UpdateProviderAsync(InsuranceProviders provider)
+        {
+            try
+            {
+                int updatedProvider = await Task.Run(() => _insuranceProvidersRepo.UpdateProviders(provider));
+                return updatedProvider;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error updating insurance provider: {ex.Message}");
+            }
+        }
+        [HttpGet("DeleteProvider")]
+        public async Task<bool> DeleteProviderAsync(int insuranceId)
+        {
+            try
+            {
+                bool isDeleted = await Task.Run(() => _insuranceProvidersRepo.DeleteProvider(insuranceId));
+                return isDeleted;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error deleting insurance provider: {ex.Message}");
             }
         }
     }
