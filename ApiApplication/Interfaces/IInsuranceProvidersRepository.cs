@@ -8,6 +8,6 @@ namespace ApiApplication.Interfaces
         List<InsuranceProviders> GetAllProviders();
         InsuranceProviders? GetProviderById(int insuranceId);
         int UpdateProviders(InsuranceProviders providers);
-        bool DeleteProvider(int insiranceId);
+        bool DeleteProvider(int insuranceId);
     }
 }

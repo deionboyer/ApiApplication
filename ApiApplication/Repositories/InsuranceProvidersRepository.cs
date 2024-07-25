@@ -1,11 +1,11 @@
-﻿using ApiApplication.Models;
+﻿using ApiApplication.Interfaces;
+using ApiApplication.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using System.Reflection.Metadata.Ecma335;
 
 namespace ApiApplication.Repositories
 {
-    public class InsuranceProvidersRepository
+    public class InsuranceProvidersRepository : IInsuranceProvidersRepository
     {
         private readonly string _connectionString;
         public InsuranceProvidersRepository(IConfiguration configuration)
@@ -16,19 +16,18 @@ namespace ApiApplication.Repositories
         public int CreateInsuranceProvider(InsuranceProviders provider)
         {
             int insuranceId = 0;
-            string insertSql = @"INSERT INTO INSURANCEPROVIDERS (STATE,INSURANCENAME,COVERED,COPAY)
+            string insertSql = @"INSERT INTO INSURANCEPROVIDER (STATE,INSURANCENAME,COPAY)
                                      OUTPUT INSERTED.INSURANCEID
-                                     VALUES (@STATE, @COVERED,@COPAY)";
+                                     VALUES (@STATE, @INSURANCENAME,@COPAY)";
             using (var sqlConnection = new SqlConnection(_connectionString))
             {
                 using (var sqlCommand = new SqlCommand(insertSql, sqlConnection))
                 {
                     sqlCommand.Parameters.Add(new SqlParameter("@STATE", provider.State));
                     sqlCommand.Parameters.Add(new SqlParameter("@INSURANCENAME",provider.InsuranceName));
-                    sqlCommand.Parameters.Add(new SqlParameter("@COVERED", provider.Covered));
                     sqlCommand.Parameters.Add(new SqlParameter("@COPAY",provider.CoPay));
 
-                    sqlCommand.Connection.Open();
+                    sqlConnection.Open();
                     insuranceId = (int)sqlCommand.ExecuteScalar();
                     sqlCommand.Connection.Close();
                 }
@@ -39,7 +38,7 @@ namespace ApiApplication.Repositories
         public List<InsuranceProviders> GetAllProviders()
         {
             List<InsuranceProviders> providersList = new List<InsuranceProviders>();
-            var getAllSql = @"SELECT * FROM INSURANCEPROVIDERS ORDER BY INSURANCENAME DESC";
+            var getAllSql = @"SELECT * FROM INSURANCEPROVIDER ORDER BY INSURANCEID DESC";
             using (var sqlConnection = new SqlConnection(_connectionString))
             {
                 using (var sqlCommand = new SqlCommand(@getAllSql, sqlConnection))
@@ -55,7 +54,6 @@ namespace ApiApplication.Repositories
                                 providers.InsuranceId = Convert.ToInt32(row["INSURANCEID"]);
                                 providers.State = row["STATE"].ToString();
                                 providers.InsuranceName = row["INSURANCENAME"].ToString();
-                                providers.Covered = Convert.ToBoolean(row["COVERED"]);
                                 providers.CoPay = Convert.ToInt32(row["COPAY"]);
 
                                 providersList.Add(providers);
@@ -70,7 +68,7 @@ namespace ApiApplication.Repositories
         public InsuranceProviders? GetProviderById(int insuranceId)
         {
             InsuranceProviders providers = new InsuranceProviders();
-            var singleRecordSql = @"SELECT * FROM INSURANCEPROVIDERS WHERE INSURANCEID = @INSURANCEID";
+            var singleRecordSql = @"SELECT * FROM INSURANCEPROVIDER WHERE INSURANCEID = @INSURANCEID";
             using (var sqlConnection = new SqlConnection(_connectionString))
             {
                 using (var sqlCommand = new SqlCommand(singleRecordSql, sqlConnection))
@@ -86,7 +84,6 @@ namespace ApiApplication.Repositories
                             providers.InsuranceId = Convert.ToInt32(reader["INSURANCEID"]);
                             providers.State = reader["STATE"].ToString();
                             providers.InsuranceName = reader["INSURANCENAME"].ToString();
-                            providers.Covered = Convert.ToBoolean(reader["COVERED"]);
                             providers.CoPay = Convert.ToInt32(reader["COPAY"]);
                         }
                         else
@@ -102,10 +99,9 @@ namespace ApiApplication.Repositories
 
         public int UpdateProviders(InsuranceProviders providers)
         {
-            var updateSql = @"UPDATE INSURANCEPROVIDERS
+            var updateSql = @"UPDATE INSURANCEPROVIDER
                               SET STATE = @STATE,
                                   INSURANCENAME = @INSURANCENAME,
-                                  COVERED = @COVERED,
                                   COPAY = @COPAY
                               WHERE INSURANCEID = @INSURANCEID";
             using (var sqlConnection = new SqlConnection(_connectionString))
@@ -114,7 +110,6 @@ namespace ApiApplication.Repositories
                 {
                     sqlCommand.Parameters.Add(new SqlParameter("@STATE", providers.State));
                     sqlCommand.Parameters.Add(new SqlParameter("@INSURANCENAME",providers.InsuranceName));
-                    sqlCommand.Parameters.Add(new SqlParameter("@COVERED", providers.Covered));
                     sqlCommand.Parameters.Add(new SqlParameter("@COPAY", providers.CoPay));
 
                     sqlCommand.Connection.Open();
@@ -125,14 +120,14 @@ namespace ApiApplication.Repositories
             return providers.InsuranceId;
         }
 
-        public bool DeleteProvider(int insiranceId)
+        public bool DeleteProvider(int insuranceId)
         {
-            var deleteSql = @"DELETE FROM INSURANCEPROVIDERS WHERE INSURANCEID = @INSURANCEID";
+            var deleteSql = @"DELETE FROM INSURANCEPROVIDER WHERE INSURANCEID = @INSURANCEID";
             using (var sqlConnection = new SqlConnection(_connectionString))
             {
                 using (var sqlCommand = new SqlCommand(deleteSql, sqlConnection))
                 {
-                    sqlCommand.Parameters.Add(new SqlParameter("@INSURANCEID", insiranceId));
+                    sqlCommand.Parameters.Add(new SqlParameter("@INSURANCEID", insuranceId));
 
                     sqlCommand.Connection.Open();
                     sqlCommand.ExecuteNonQuery();
