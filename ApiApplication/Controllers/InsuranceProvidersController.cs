@@ -20,6 +20,7 @@ namespace ApiApplication.Controllers
         {
             try
             {
+                // Create a new insurance provider asynchronously and return the insurance ID
                 int insuranceId = await Task.Run(() => _insuranceProvidersRepo.CreateInsuranceProvider(providers));
                 return insuranceId;
             }
@@ -33,6 +34,7 @@ namespace ApiApplication.Controllers
         {
             try
             {
+                // Retrieve all insurance providers asynchronously and return the list of providers
                 List<InsuranceProviders> providersList = await Task.Run(() => _insuranceProvidersRepo.GetAllProviders());
                 return providersList;
             }
@@ -46,6 +48,7 @@ namespace ApiApplication.Controllers
         {
             try
             {
+                // Retrieve an insurance provider by ID asynchronously and return the provider
                 InsuranceProviders provider = await Task.Run(() => _insuranceProvidersRepo.GetProviderById(insuranceId));
                 return provider;
             }
@@ -54,11 +57,12 @@ namespace ApiApplication.Controllers
                 throw new Exception($"Error retrieving insurance provider: {ex.Message}");
             }
         }
-        [HttpGet("UpdateProvider")]
+        [HttpPut("UpdateProvider")]
         public async Task<int> UpdateProviderAsync(InsuranceProviders provider)
         {
             try
             {
+                // Update an insurance provider asynchronously and return the updated provider ID
                 int updatedProvider = await Task.Run(() => _insuranceProvidersRepo.UpdateProviders(provider));
                 return updatedProvider;
             }
@@ -67,11 +71,12 @@ namespace ApiApplication.Controllers
                 throw new Exception($"Error updating insurance provider: {ex.Message}");
             }
         }
-        [HttpGet("DeleteProvider")]
+        [HttpDelete("DeleteProvider")]
         public async Task<bool> DeleteProviderAsync(int insuranceId)
         {
             try
             {
+                // Delete an insurance provider asynchronously and return a boolean indicating success
                 bool isDeleted = await Task.Run(() => _insuranceProvidersRepo.DeleteProvider(insuranceId));
                 return isDeleted;
             }

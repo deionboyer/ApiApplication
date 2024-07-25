@@ -12,7 +12,7 @@ namespace ApiApplication.Repositories
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
-
+        // Method to create a new insurance provider
         public int CreateInsuranceProvider(InsuranceProviders provider)
         {
             int insuranceId = 0;
@@ -23,18 +23,19 @@ namespace ApiApplication.Repositories
             {
                 using (var sqlCommand = new SqlCommand(insertSql, sqlConnection))
                 {
+                    // Add parameters to the SQL command
                     sqlCommand.Parameters.Add(new SqlParameter("@STATE", provider.State));
                     sqlCommand.Parameters.Add(new SqlParameter("@INSURANCENAME",provider.InsuranceName));
                     sqlCommand.Parameters.Add(new SqlParameter("@COPAY",provider.CoPay));
-
+                    // Open the connection, execute the command, and get the inserted insurance ID
                     sqlConnection.Open();
                     insuranceId = (int)sqlCommand.ExecuteScalar();
                     sqlCommand.Connection.Close();
                 }
             }
-            return insuranceId;
+            return insuranceId; // Return the ID of the created insurance provider
         }
-
+        // Method to get all insurance providers
         public List<InsuranceProviders> GetAllProviders()
         {
             List<InsuranceProviders> providersList = new List<InsuranceProviders>();
@@ -47,24 +48,25 @@ namespace ApiApplication.Repositories
                     {
                         using (DataTable dataTable = new DataTable())
                         {
-                            sqlDataAdapter.Fill(dataTable);
+                            sqlDataAdapter.Fill(dataTable); // Fill the DataTable with the result of the query
                             foreach (DataRow row in dataTable.Rows)
                             {
+                                // Create a new insurance provider object and populate its properties
                                 InsuranceProviders providers = new InsuranceProviders();
                                 providers.InsuranceId = Convert.ToInt32(row["INSURANCEID"]);
                                 providers.State = row["STATE"].ToString();
                                 providers.InsuranceName = row["INSURANCENAME"].ToString();
                                 providers.CoPay = Convert.ToInt32(row["COPAY"]);
 
-                                providersList.Add(providers);
+                                providersList.Add(providers); // Add the provider to the list
                             }
                         }
                     }
                 }
             }
-            return providersList;
+            return providersList; // Return the list of insurance providers
         }
-
+        // Method to get an insurance provider by ID
         public InsuranceProviders? GetProviderById(int insuranceId)
         {
             InsuranceProviders providers = new InsuranceProviders();
@@ -73,14 +75,14 @@ namespace ApiApplication.Repositories
             {
                 using (var sqlCommand = new SqlCommand(singleRecordSql, sqlConnection))
                 {
-                    sqlCommand.Parameters.Add(new SqlParameter("INSURANCEID", insuranceId));
+                    sqlCommand.Parameters.Add(new SqlParameter("INSURANCEID", insuranceId)); // Add the insurance ID parameter
                     sqlConnection.Open();
                     using (SqlDataReader reader = sqlCommand.ExecuteReader())
                     {
                         if (reader.HasRows)
                         {
                             reader.Read();
-
+                            // Populate the insurance provider object with the data from the reader
                             providers.InsuranceId = Convert.ToInt32(reader["INSURANCEID"]);
                             providers.State = reader["STATE"].ToString();
                             providers.InsuranceName = reader["INSURANCENAME"].ToString();
@@ -94,9 +96,9 @@ namespace ApiApplication.Repositories
                     sqlConnection.Close();
                 }
             }
-            return providers;
+            return providers; // Return the insurance provider object
         }
-
+        // Method to update an insurance provider
         public int UpdateProviders(InsuranceProviders providers)
         {
             var updateSql = @"UPDATE INSURANCEPROVIDER
@@ -108,18 +110,19 @@ namespace ApiApplication.Repositories
             {
                 using (var sqlCommand = new SqlCommand(updateSql, sqlConnection))
                 {
+                    // Add parameters to the SQL command
                     sqlCommand.Parameters.Add(new SqlParameter("@STATE", providers.State));
                     sqlCommand.Parameters.Add(new SqlParameter("@INSURANCENAME",providers.InsuranceName));
                     sqlCommand.Parameters.Add(new SqlParameter("@COPAY", providers.CoPay));
-
+                    // Open the connection and execute the command
                     sqlCommand.Connection.Open();
                     sqlCommand.ExecuteNonQuery();
                     sqlCommand.Connection.Close();
                 }
             }
-            return providers.InsuranceId;
+            return providers.InsuranceId; // Return the ID of the updated insurance provider
         }
-
+        // Method to delete an insurance provider by ID
         public bool DeleteProvider(int insuranceId)
         {
             var deleteSql = @"DELETE FROM INSURANCEPROVIDER WHERE INSURANCEID = @INSURANCEID";
@@ -127,14 +130,14 @@ namespace ApiApplication.Repositories
             {
                 using (var sqlCommand = new SqlCommand(deleteSql, sqlConnection))
                 {
-                    sqlCommand.Parameters.Add(new SqlParameter("@INSURANCEID", insuranceId));
-
+                    sqlCommand.Parameters.Add(new SqlParameter("@INSURANCEID", insuranceId)); // Add the insurance ID parameter
+                    // Open the connection and execute the command
                     sqlCommand.Connection.Open();
                     sqlCommand.ExecuteNonQuery();
                     sqlCommand.Connection.Close();
                 }
             }
-            return true;
+            return true; // Return true to indicate successful deletion
         }
     }
 }

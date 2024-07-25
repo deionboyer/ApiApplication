@@ -25,6 +25,7 @@ namespace ApiApplication.Controllers
         {
             try
             {
+                // Create a new patient asynchronously and return the patient ID
                 int patientId = await Task.Run(() => _patientsRepo.CreatePatient(patient));
                 return patientId;
             }
@@ -38,6 +39,7 @@ namespace ApiApplication.Controllers
         {
             try
             {
+                // Retrieve all patients asynchronously and return the list of patients
                 List<Patients> patients = await Task.Run(() => _patientsRepo.GetAllPatients());
                 return patients;
             }
@@ -51,6 +53,7 @@ namespace ApiApplication.Controllers
         {
             try
             {
+                // Retrieve a patient by ID asynchronously and return the patient
                 Patients patient = await Task.Run(() => _patientsRepo.GetPatientById(patientId));
                 return patient;
             } 
@@ -64,6 +67,7 @@ namespace ApiApplication.Controllers
         {
             try
             {
+                // Update a patient asynchronously and return the updated patient ID
                 int updatedPatientId = await Task.Run(() => _patientsRepo.UpdatePatient(patient));
                 return updatedPatientId;
             }
@@ -77,6 +81,7 @@ namespace ApiApplication.Controllers
         {
             try
             {
+                // Delete a patient asynchronously and return a boolean indicating success
                 bool isDeleted = await Task.Run(() => _patientsRepo.DeletePatients(patientId));
                 return isDeleted;
             }
