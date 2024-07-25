@@ -13,15 +13,14 @@ namespace ApiApplication.Repositories
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
-
         //Create NEW PATIENT
         public int CreatePatient(Patients patient)
         {
             int patientId = 0;
-            bool isEmailvalid = IsEmailUnique(patient.EmailAddress);
+            bool isEmailvalid = IsEmailUnique(patient.EmailAddress); // Check if the email is unique
             if (isEmailvalid == false)
             {
-                throw new Exception("Emailaddress is already in use.");
+                throw new Exception("Email Address is already in use."); // Throw an exception if the email is not unique
             }
 
             var insertSql = @"INSERT INTO PATIENTS (FIRSTNAME, LASTNAME, PHONENUMBER,BIRTHDATE,EMAILADDRESS,INSURANCEID)
@@ -31,22 +30,22 @@ namespace ApiApplication.Repositories
             {
                 using (var sqlCommand = new SqlCommand(insertSql, sqlConnection))
                 {
+                    // Add parameters to the SQL command
                     sqlCommand.Parameters.Add(new SqlParameter("@FIRSTNAME", patient.FirstName));
                     sqlCommand.Parameters.Add(new SqlParameter("@LASTNAME", patient.LastName));
                     sqlCommand.Parameters.Add(new SqlParameter("@PHONENUMBER", patient.PhoneNumber));
                     sqlCommand.Parameters.Add(new SqlParameter("@BIRTHDATE", patient.BirthDate));
                     sqlCommand.Parameters.Add(new SqlParameter("@EMAILADDRESS", patient.EmailAddress));
                     sqlCommand.Parameters.Add(new SqlParameter("@INSURANCEID",patient.InsuranceId));
-                    ///create
+                    // Open the connection, execute the command, and get the inserted patient ID
                     sqlCommand.Connection.Open();
                     patientId = (int)sqlCommand.ExecuteScalar();//Executes INSERT query
                     sqlCommand.Connection.Close();
-                }//Return ID
+                }
             }
-            return patientId;
+            return patientId; // Return the ID of the created patient
         }
-
-                
+        // Get all patients    
         public List<Patients>? GetAllPatients()
         {
             List<Patients> patientsList = new List<Patients>();
@@ -59,9 +58,10 @@ namespace ApiApplication.Repositories
                     {
                         using (DataTable dataTable = new DataTable())
                         {
-                            sqlDataAdtapter.Fill(dataTable);
+                            sqlDataAdtapter.Fill(dataTable); // Fill the DataTable with the result of the query
                             foreach (DataRow row in dataTable.Rows)
                             {
+                                // Create a new patient object and populate its properties
                                 Patients patient = new Patients();
                                 patient.PatientId = Convert.ToInt32(row["PATIENTID"]);
                                 patient.FirstName = row["FIRSTNAME"].ToString();
@@ -71,15 +71,14 @@ namespace ApiApplication.Repositories
                                 patient.EmailAddress = row["EMAILADDRESS"].ToString();
                                 patient.InsuranceId = Convert.ToInt32(row["INSURANCEID"]);
 
-                                patientsList.Add(patient);
+                                patientsList.Add(patient); // Add the patient to the list
                             }
                         }
                     }
                 }
             }
-            return patientsList;
+            return patientsList; // Return the list of patients
         }
-
         //GET PATIENT BY ID
         public Patients? GetPatientById(int patientId)
         {
@@ -90,15 +89,14 @@ namespace ApiApplication.Repositories
             {
                 using (var sqlCommand = new SqlCommand(singleRecordSql, sqlConnection))
                 {
-                    sqlCommand.Parameters.Add(new SqlParameter("@PATIENTID", patientId));
+                    sqlCommand.Parameters.Add(new SqlParameter("@PATIENTID", patientId)); // Add the patient ID parameter
                     sqlCommand.Connection.Open();
                     using (SqlDataReader reader = sqlCommand.ExecuteReader())
                     {
                         if (reader.HasRows)
                         {
                             reader.Read();
-
-
+                            // Populate the patient object with the data from the reader
                             patients.PatientId = Convert.ToInt32(reader["PATIENTID"]);
                             patients.FirstName = reader["FIRSTNAME"].ToString();
                             patients.LastName = reader["LASTNAME"].ToString();
@@ -106,21 +104,18 @@ namespace ApiApplication.Repositories
                             patients.BirthDate = reader["BIRTHDATE"].ToString();
                             patients.EmailAddress = reader["EMAILADDRESS"].ToString();
                             patients.InsuranceId = Convert.ToInt32(reader["INSURANCEID"]);
-
-
                         }
                         else
                         {
-                            throw new Exception("No rows found.");
+                            throw new Exception("No rows found."); // Throw an exception if no rows are found
                         }
                     }
                     sqlConnection.Close();
                 }
             }
-
-            return patients;
+            return patients; // Return the patient object
         }
-
+        //Update a Patient
         public int UpdatePatient(Patients patients)
         {
             var updateSql = @"UPDATE PATIENTS
@@ -135,6 +130,7 @@ namespace ApiApplication.Repositories
             {
                 using (var sqlCommand = new SqlCommand(updateSql, sqlConnection))
                 {
+                    // Add parameters to the SQL command
                     sqlCommand.Parameters.Add(new SqlParameter("@FIRSTNAME", patients.FirstName));
                     sqlCommand.Parameters.Add(new SqlParameter("@LASTNAME", patients.LastName));
                     sqlCommand.Parameters.Add(new SqlParameter("@PHONENUMBER",patients.PhoneNumber));
@@ -142,17 +138,15 @@ namespace ApiApplication.Repositories
                     sqlCommand.Parameters.Add(new SqlParameter("@EMAILADDRESS", patients.EmailAddress));
                     sqlCommand.Parameters.Add(new SqlParameter("@PATIENTID", patients.PatientId));
                     sqlCommand.Parameters.Add(new SqlParameter("@INSURANCEID", patients.InsuranceId));
-                   
-
+                    // Open the connection and execute the command
                     sqlCommand.Connection.Open();
                     sqlCommand.ExecuteNonQuery();
                     sqlCommand.Connection.Close();
-
                 }
             }
-            return patients.PatientId;
+            return patients.PatientId; // Return the ID of the updated patient
         }
-
+        // Delete a patient by ID
         public bool DeletePatients(int patientId)
         {
             var deleteSql = @"DELETE FROM PATIENTS WHERE PATIENTID = @PATIENTID";
@@ -160,15 +154,16 @@ namespace ApiApplication.Repositories
             {
                 using (var sqlCommand = new SqlCommand(deleteSql, sqlConnection))
                 {
-                    sqlCommand.Parameters.Add(new SqlParameter("@PATIENTID", patientId));
-
+                    sqlCommand.Parameters.Add(new SqlParameter("@PATIENTID", patientId)); // Add the patient ID parameter
+                    // Open the connection and execute the command
                     sqlCommand.Connection.Open();
                     sqlCommand.ExecuteNonQuery();
                     sqlCommand.Connection.Close();
                 }
             }
-            return true;
+            return true; // Return true to indicate successful deletion
         }
+        // Check if an email address is unique
         public bool IsEmailUnique(string emailAddress)
         {
             using (var sqlConnection = new SqlConnection(_connectionString))
